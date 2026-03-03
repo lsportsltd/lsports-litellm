@@ -2066,13 +2066,11 @@ async def get_key_object(
         )
 
     # else, check db
-    _valid_token: Optional[BaseModel] = (
-        await _fetch_key_object_from_db_with_reconnect(
-            hashed_token=hashed_token,
-            prisma_client=prisma_client,
-            parent_otel_span=parent_otel_span,
-            proxy_logging_obj=proxy_logging_obj,
-        )
+    _valid_token: Optional[BaseModel] = await _fetch_key_object_from_db_with_reconnect(
+        hashed_token=hashed_token,
+        prisma_client=prisma_client,
+        parent_otel_span=parent_otel_span,
+        proxy_logging_obj=proxy_logging_obj,
     )
 
     if _valid_token is None:

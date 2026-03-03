@@ -31,6 +31,7 @@ def is_anthropic_oauth_key(value: Optional[str]) -> bool:
         value = value[7:]
     return value.startswith(ANTHROPIC_OAUTH_TOKEN_PREFIX)
 
+
 def optionally_handle_anthropic_oauth(
     headers: dict, api_key: Optional[str]
 ) -> tuple[dict, Optional[str]]:

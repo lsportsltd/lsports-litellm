@@ -1654,9 +1654,7 @@ class Logging(LiteLLMLoggingBaseClass):
 
         self.model_call_details[
             "standard_logging_object"
-        ] = self._build_standard_logging_payload(
-            logging_result, start_time, end_time
-        )
+        ] = self._build_standard_logging_payload(logging_result, start_time, end_time)
 
         if (
             standard_logging_payload := self.model_call_details.get(
@@ -2519,9 +2517,7 @@ class Logging(LiteLLMLoggingBaseClass):
                 ## STANDARDIZED LOGGING PAYLOAD
                 self.model_call_details[
                     "standard_logging_object"
-                ] = self._build_standard_logging_payload(
-                    result, start_time, end_time
-                )
+                ] = self._build_standard_logging_payload(result, start_time, end_time)
 
                 # print standard logging payload
                 if (
@@ -4204,8 +4200,7 @@ def _maybe_auto_initialize_arize_phoenix(_in_memory_loggers: list) -> None:
         litellm.logging_callback_manager.add_litellm_callback(phoenix_logger)
 
         verbose_logger.info(
-            "Auto-initialized Arize Phoenix logger alongside otel "
-            "(endpoint=%s)",
+            "Auto-initialized Arize Phoenix logger alongside otel " "(endpoint=%s)",
             arize_phoenix_config.endpoint,
         )
     except Exception as e:
@@ -4768,9 +4763,11 @@ class StandardLoggingPayloadSetup:
             ).model_dump()
         if isinstance(_raw, dict):
             if ResponseAPILoggingUtils._is_response_api_usage(_raw):
-                return ResponseAPILoggingUtils._transform_response_api_usage_to_chat_usage(
-                    _raw
-                ).model_dump()
+                return (
+                    ResponseAPILoggingUtils._transform_response_api_usage_to_chat_usage(
+                        _raw
+                    ).model_dump()
+                )
             return _raw
         if isinstance(_raw, Usage):
             return _raw.model_dump()
@@ -5616,4 +5613,3 @@ def create_dummy_standard_logging_payload() -> StandardLoggingPayload:
         model_parameters={"stream": True},
         hidden_params=hidden_params,
     )
-

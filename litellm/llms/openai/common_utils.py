@@ -242,5 +242,3 @@ class BaseOpenAILLM:
             verify=ssl_config,
             follow_redirects=True,
         )
-
-

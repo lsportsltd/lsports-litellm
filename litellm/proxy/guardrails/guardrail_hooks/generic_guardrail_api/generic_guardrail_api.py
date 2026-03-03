@@ -201,9 +201,9 @@ class GenericGuardrailAPI(CustomGuardrail):
             additional_provider_specific_params or {}
         )
 
-        self.unreachable_fallback: Literal["fail_closed", "fail_open"] = (
-            unreachable_fallback
-        )
+        self.unreachable_fallback: Literal[
+            "fail_closed", "fail_open"
+        ] = unreachable_fallback
 
         # Set supported event hooks
         if "supported_event_hooks" not in kwargs:
@@ -277,7 +277,9 @@ class GenericGuardrailAPI(CustomGuardrail):
         error: Exception,
         http_status_code: Optional[int] = None,
     ) -> GenericGuardrailAPIInputs:
-        status_suffix = f" http_status_code={http_status_code}" if http_status_code else ""
+        status_suffix = (
+            f" http_status_code={http_status_code}" if http_status_code else ""
+        )
         verbose_proxy_logger.critical(
             "Generic Guardrail API unreachable (fail-open). Proceeding without guardrail.%s "
             "guardrail_name=%s api_base=%s input_type=%s litellm_call_id=%s litellm_trace_id=%s",

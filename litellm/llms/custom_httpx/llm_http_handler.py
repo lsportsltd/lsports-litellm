@@ -444,7 +444,9 @@ class BaseLLMHTTPHandler:
         # Check if stream was converted for WebSearch interception
         # This is set by the async_pre_request_hook in WebSearchInterceptionLogger
         if litellm_params.get("_websearch_interception_converted_stream", False):
-            logging_obj.model_call_details["websearch_interception_converted_stream"] = True
+            logging_obj.model_call_details[
+                "websearch_interception_converted_stream"
+            ] = True
 
         if acompletion is True:
             if stream is True:
@@ -1354,6 +1356,7 @@ class BaseLLMHTTPHandler:
         Returns: (headers, complete_url, data, files)
         """
         from litellm.llms.base_llm.ocr.transformation import OCRRequestData
+
         headers = provider_config.validate_environment(
             api_key=api_key,
             api_base=api_base,
@@ -1846,9 +1849,11 @@ class BaseLLMHTTPHandler:
             Optional[litellm.types.utils.ProviderSpecificHeader],
             kwargs.get("provider_specific_header", None),
         )
-        provider_specific_headers = ProviderSpecificHeaderUtils.get_provider_specific_headers(
-            provider_specific_header=provider_specific_header,
-            custom_llm_provider=custom_llm_provider,
+        provider_specific_headers = (
+            ProviderSpecificHeaderUtils.get_provider_specific_headers(
+                provider_specific_header=provider_specific_header,
+                custom_llm_provider=custom_llm_provider,
+            )
         )
         forwarded_headers = kwargs.get("headers", None)
         # Also check for extra_headers in kwargs (from config or direct calls)
@@ -1873,7 +1878,7 @@ class BaseLLMHTTPHandler:
             api_key=api_key,
             api_base=api_base,
         )
-        
+
         headers = update_headers_with_filtered_beta(
             headers=headers, provider=custom_llm_provider
         )
@@ -2847,12 +2852,12 @@ class BaseLLMHTTPHandler:
     ) -> tuple[Optional[str], Optional[dict]]:
         """
         Extract upload URL from initial file creation response.
-        
+
         Args:
             response: HTTP response from initial file creation request
             upload_url_location: Where to find URL ('headers' or 'body')
             upload_url_key: Key name for URL in response body (default: 'upload_url')
-            
+
         Returns:
             Tuple of (upload_url, response_data)
             - upload_url: The extracted upload URL, or None if not found
@@ -2933,7 +2938,10 @@ class BaseLLMHTTPHandler:
         else:
             sync_httpx_client = client
 
-        if isinstance(transformed_request, dict) and "initial_request" in transformed_request:
+        if (
+            isinstance(transformed_request, dict)
+            and "initial_request" in transformed_request
+        ):
             # Handle two-step uploads (TwoStepFileUploadConfig)
             # Used by providers like Manus, Google Cloud Storage
             try:
@@ -2949,24 +2957,33 @@ class BaseLLMHTTPHandler:
                 )
 
                 # Extract upload URL from response
-                upload_url, initial_response_data = self._extract_upload_url_from_response(
+                (
+                    upload_url,
+                    initial_response_data,
+                ) = self._extract_upload_url_from_response(
                     response=initial_response,
-                    upload_url_location=transformed_request.get("upload_url_location", "headers"),
-                    upload_url_key=transformed_request.get("upload_url_key", "upload_url"),
+                    upload_url_location=transformed_request.get(
+                        "upload_url_location", "headers"
+                    ),
+                    upload_url_key=transformed_request.get(
+                        "upload_url_key", "upload_url"
+                    ),
                 )
 
                 if not upload_url:
                     raise ValueError("Failed to get upload URL from initial request")
 
                 # Step 2: Upload the actual file
-                upload_method = transformed_request["upload_request"].get("method", "POST").lower()
+                upload_method = (
+                    transformed_request["upload_request"].get("method", "POST").lower()
+                )
                 upload_response = getattr(sync_httpx_client, upload_method)(
                     url=upload_url,
                     headers=transformed_request["upload_request"]["headers"],
                     data=transformed_request["upload_request"]["data"],
                     timeout=timeout,
                 )
-                
+
                 # Store initial response for transformation
                 if initial_response_data:
                     litellm_params["initial_file_response"] = initial_response_data
@@ -2975,7 +2992,11 @@ class BaseLLMHTTPHandler:
                     e=e,
                     provider_config=provider_config,
                 )
-        elif isinstance(transformed_request, dict) and "method" in transformed_request and "initial_request" not in transformed_request:
+        elif (
+            isinstance(transformed_request, dict)
+            and "method" in transformed_request
+            and "initial_request" not in transformed_request
+        ):
             # Handle pre-signed requests (e.g., from Bedrock S3 uploads)
             # Type narrowing: this is a plain dict, not TwoStepFileUploadConfig
             presigned_request = cast(Dict[str, Any], transformed_request)
@@ -3012,7 +3033,9 @@ class BaseLLMHTTPHandler:
                     timeout=timeout,
                 )
         else:
-            raise ValueError(f"Unsupported transformed_request type: {type(transformed_request)}")
+            raise ValueError(
+                f"Unsupported transformed_request type: {type(transformed_request)}"
+            )
 
         # Store the upload URL in litellm_params for the transformation method
         # Honour the URL already set by transform_create_file_request (e.g. Bedrock pre-signed S3 uploads),
@@ -3062,7 +3085,10 @@ class BaseLLMHTTPHandler:
             },
         )
 
-        if isinstance(transformed_request, dict) and "initial_request" in transformed_request:
+        if (
+            isinstance(transformed_request, dict)
+            and "initial_request" in transformed_request
+        ):
             # Handle two-step uploads (TwoStepFileUploadConfig)
             # Used by providers like Manus, Google Cloud Storage
             try:
@@ -3078,24 +3104,33 @@ class BaseLLMHTTPHandler:
                 )
 
                 # Extract upload URL from response
-                upload_url, initial_response_data = self._extract_upload_url_from_response(
+                (
+                    upload_url,
+                    initial_response_data,
+                ) = self._extract_upload_url_from_response(
                     response=initial_response,
-                    upload_url_location=transformed_request.get("upload_url_location", "headers"),
-                    upload_url_key=transformed_request.get("upload_url_key", "upload_url"),
+                    upload_url_location=transformed_request.get(
+                        "upload_url_location", "headers"
+                    ),
+                    upload_url_key=transformed_request.get(
+                        "upload_url_key", "upload_url"
+                    ),
                 )
 
                 if not upload_url:
                     raise ValueError("Failed to get upload URL from initial request")
 
                 # Step 2: Upload the actual file
-                upload_method = transformed_request["upload_request"].get("method", "POST").lower()
+                upload_method = (
+                    transformed_request["upload_request"].get("method", "POST").lower()
+                )
                 upload_response = await getattr(async_httpx_client, upload_method)(
                     url=upload_url,
                     headers=transformed_request["upload_request"]["headers"],
                     data=transformed_request["upload_request"]["data"],
                     timeout=timeout,
                 )
-                
+
                 # Store initial response for transformation
                 if initial_response_data:
                     litellm_params["initial_file_response"] = initial_response_data
@@ -3105,7 +3140,11 @@ class BaseLLMHTTPHandler:
                     e=e,
                     provider_config=provider_config,
                 )
-        elif isinstance(transformed_request, dict) and "method" in transformed_request and "initial_request" not in transformed_request:
+        elif (
+            isinstance(transformed_request, dict)
+            and "method" in transformed_request
+            and "initial_request" not in transformed_request
+        ):
             # Handle pre-signed requests (e.g., from Bedrock S3 uploads)
             # Type narrowing: this is a plain dict, not TwoStepFileUploadConfig
             presigned_request = cast(Dict[str, Any], transformed_request)
@@ -3140,7 +3179,9 @@ class BaseLLMHTTPHandler:
                     timeout=timeout,
                 )
         else:
-            raise ValueError(f"Unsupported transformed_request type: {type(transformed_request)}")
+            raise ValueError(
+                f"Unsupported transformed_request type: {type(transformed_request)}"
+            )
 
         return provider_config.transform_create_file_response(
             model=None,
@@ -3739,7 +3780,10 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, data = responses_api_provider_config.transform_compact_response_api_request(
+        (
+            url,
+            data,
+        ) = responses_api_provider_config.transform_compact_response_api_request(
             model=model,
             input=input,
             response_api_optional_request_params=response_api_optional_request_params,
@@ -3818,7 +3862,10 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, data = responses_api_provider_config.transform_compact_response_api_request(
+        (
+            url,
+            data,
+        ) = responses_api_provider_config.transform_compact_response_api_request(
             model=model,
             input=input,
             response_api_optional_request_params=response_api_optional_request_params,
@@ -3912,9 +3959,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = sync_httpx_client.get(
-                url=url, headers=headers, params=params
-            )
+            response = sync_httpx_client.get(url=url, headers=headers, params=params)
         except Exception as e:
             raise self._handle_error(e=e, provider_config=provider_config)
 
@@ -4042,9 +4087,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = sync_httpx_client.delete(
-                url=url, headers=headers, params=params
-            )
+            response = sync_httpx_client.delete(url=url, headers=headers, params=params)
         except Exception as e:
             raise self._handle_error(e=e, provider_config=provider_config)
 
@@ -4172,9 +4215,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = sync_httpx_client.get(
-                url=url, headers=headers, params=params
-            )
+            response = sync_httpx_client.get(url=url, headers=headers, params=params)
         except Exception as e:
             raise self._handle_error(e=e, provider_config=provider_config)
 
@@ -4254,7 +4295,9 @@ class BaseLLMHTTPHandler:
         _is_async: bool = False,
         client: Optional[Union[HTTPHandler, AsyncHTTPHandler]] = None,
         timeout: Optional[Union[float, httpx.Timeout]] = None,
-    ) -> Union["HttpxBinaryResponseContent", Coroutine[Any, Any, "HttpxBinaryResponseContent"]]:
+    ) -> Union[
+        "HttpxBinaryResponseContent", Coroutine[Any, Any, "HttpxBinaryResponseContent"]
+    ]:
         """
         Retrieve file content by ID
         """
@@ -4302,9 +4345,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = sync_httpx_client.get(
-                url=url, headers=headers, params=params
-            )
+            response = sync_httpx_client.get(url=url, headers=headers, params=params)
         except Exception as e:
             raise self._handle_error(e=e, provider_config=provider_config)
 
@@ -4412,32 +4453,33 @@ class BaseLLMHTTPHandler:
         from litellm._logging import verbose_logger
         from litellm.integrations.custom_logger import CustomLogger
 
-        callbacks = litellm.callbacks + (
-            logging_obj.dynamic_success_callbacks or []
-        )
+        callbacks = litellm.callbacks + (logging_obj.dynamic_success_callbacks or [])
         tools = anthropic_messages_optional_request_params.get("tools", [])
 
         for callback in callbacks:
             try:
                 if isinstance(callback, CustomLogger):
                     # First: Check if agentic loop should run
-                    should_run, tool_calls = (
-                        await callback.async_should_run_agentic_loop(
-                            response=response,
-                            model=model,
-                            messages=messages,
-                            tools=tools,
-                            stream=stream,
-                            custom_llm_provider=custom_llm_provider,
-                            kwargs=kwargs,
-                        )
+                    (
+                        should_run,
+                        tool_calls,
+                    ) = await callback.async_should_run_agentic_loop(
+                        response=response,
+                        model=model,
+                        messages=messages,
+                        tools=tools,
+                        stream=stream,
+                        custom_llm_provider=custom_llm_provider,
+                        kwargs=kwargs,
                     )
 
                     if should_run:
                         # Second: Execute agentic loop
                         # Add custom_llm_provider to kwargs so the agentic loop can reconstruct the full model name
                         kwargs_with_provider = kwargs.copy() if kwargs else {}
-                        kwargs_with_provider["custom_llm_provider"] = custom_llm_provider
+                        kwargs_with_provider[
+                            "custom_llm_provider"
+                        ] = custom_llm_provider
                         agentic_response = await callback.async_run_agentic_loop(
                             tools=tool_calls,
                             model=model,
@@ -4463,11 +4505,13 @@ class BaseLLMHTTPHandler:
         # 2. No agentic loop ran (LLM didn't use the tool)
         # 3. We have a non-streaming response that needs to be converted to streaming
         websearch_converted_stream = (
-            logging_obj.model_call_details.get("websearch_interception_converted_stream", False)
+            logging_obj.model_call_details.get(
+                "websearch_interception_converted_stream", False
+            )
             if logging_obj is not None
             else False
         )
-        
+
         if websearch_converted_stream:
             from typing import cast
 
@@ -4478,11 +4522,11 @@ class BaseLLMHTTPHandler:
             from litellm.types.llms.anthropic_messages.anthropic_response import (
                 AnthropicMessagesResponse,
             )
-            
+
             verbose_logger.debug(
                 "WebSearchInterception: No tool call made, converting non-streaming response to fake stream"
             )
-            
+
             # Convert the non-streaming response to a fake stream
             # The response should be an AnthropicMessagesResponse (dict)
             if isinstance(response, dict):
@@ -4491,7 +4535,7 @@ class BaseLLMHTTPHandler:
                     response=cast(AnthropicMessagesResponse, response)
                 )
                 return fake_stream
-        
+
         return None
 
     async def _call_agentic_chat_completion_hooks(
@@ -4516,45 +4560,50 @@ class BaseLLMHTTPHandler:
         from litellm._logging import verbose_logger
         from litellm.integrations.custom_logger import CustomLogger
 
-        callbacks = litellm.callbacks + (
-            logging_obj.dynamic_success_callbacks or []
-        )
+        callbacks = litellm.callbacks + (logging_obj.dynamic_success_callbacks or [])
         tools = optional_params.get("tools", [])
 
         for callback in callbacks:
             try:
                 if isinstance(callback, CustomLogger):
                     # Check if callback has the chat completion agentic loop method
-                    if not hasattr(callback, "async_should_run_chat_completion_agentic_loop"):
+                    if not hasattr(
+                        callback, "async_should_run_chat_completion_agentic_loop"
+                    ):
                         continue
 
                     # First: Check if agentic loop should run
-                    should_run, tool_calls = (
-                        await callback.async_should_run_chat_completion_agentic_loop(
-                            response=response,
-                            model=model,
-                            messages=messages,
-                            tools=tools,
-                            stream=stream,
-                            custom_llm_provider=custom_llm_provider,
-                            kwargs=kwargs,
-                        )
+                    (
+                        should_run,
+                        tool_calls,
+                    ) = await callback.async_should_run_chat_completion_agentic_loop(
+                        response=response,
+                        model=model,
+                        messages=messages,
+                        tools=tools,
+                        stream=stream,
+                        custom_llm_provider=custom_llm_provider,
+                        kwargs=kwargs,
                     )
 
                     if should_run:
                         # Second: Execute agentic loop
                         # Add custom_llm_provider to kwargs so the agentic loop can reconstruct the full model name
                         kwargs_with_provider = kwargs.copy() if kwargs else {}
-                        kwargs_with_provider["custom_llm_provider"] = custom_llm_provider
-                        agentic_response = await callback.async_run_chat_completion_agentic_loop(
-                            tools=tool_calls,
-                            model=model,
-                            messages=messages,
-                            response=response,
-                            optional_params=optional_params,
-                            logging_obj=logging_obj,
-                            stream=stream,
-                            kwargs=kwargs_with_provider,
+                        kwargs_with_provider[
+                            "custom_llm_provider"
+                        ] = custom_llm_provider
+                        agentic_response = (
+                            await callback.async_run_chat_completion_agentic_loop(
+                                tools=tool_calls,
+                                model=model,
+                                messages=messages,
+                                response=response,
+                                optional_params=optional_params,
+                                logging_obj=logging_obj,
+                                stream=stream,
+                                kwargs=kwargs_with_provider,
+                            )
                         )
                         # First hook that runs agentic loop wins
                         return agentic_response
@@ -4570,27 +4619,29 @@ class BaseLLMHTTPHandler:
         # 2. No agentic loop ran (LLM didn't use the tool)
         # 3. We have a non-streaming response that needs to be converted to streaming
         websearch_converted_stream = (
-            logging_obj.model_call_details.get("websearch_interception_converted_stream", False)
+            logging_obj.model_call_details.get(
+                "websearch_interception_converted_stream", False
+            )
             if logging_obj is not None
             else False
         )
-        
+
         if websearch_converted_stream:
             from litellm._logging import verbose_logger
             from litellm.llms.base_llm.base_model_iterator import (
                 convert_model_response_to_streaming,
             )
-            
+
             verbose_logger.debug(
                 "WebSearchInterception: No tool call made, converting non-streaming chat completion to fake stream"
             )
-            
+
             # Convert the non-streaming ModelResponse to a fake stream
             if hasattr(response, "choices"):
                 # Use the existing converter for ModelResponse
                 fake_stream = convert_model_response_to_streaming(response)
                 return fake_stream
-        
+
         return None
 
     def _handle_error(
@@ -4690,7 +4741,9 @@ class BaseLLMHTTPHandler:
                 # (e.g. Gemini/Vertex AI Live needs a `setup` message before any realtime_input)
                 _session_config: Optional[str] = None
                 if provider_config.requires_session_configuration():
-                    _session_config = provider_config.session_configuration_request(model)
+                    _session_config = provider_config.session_configuration_request(
+                        model
+                    )
                     if _session_config:
                         await backend_ws.send(_session_config)
 
@@ -4748,10 +4801,7 @@ class BaseLLMHTTPHandler:
         _is_async: bool = False,
         fake_stream: bool = False,
         litellm_metadata: Optional[Dict[str, Any]] = None,
-    ) -> Union[
-        ImageResponse,
-        Coroutine[Any, Any, ImageResponse],
-    ]:
+    ) -> Union[ImageResponse, Coroutine[Any, Any, ImageResponse],]:
         """
 
         Handles image edit requests.
@@ -4963,10 +5013,7 @@ class BaseLLMHTTPHandler:
         fake_stream: bool = False,
         litellm_metadata: Optional[Dict[str, Any]] = None,
         api_key: Optional[str] = None,
-    ) -> Union[
-        ImageResponse,
-        Coroutine[Any, Any, ImageResponse],
-    ]:
+    ) -> Union[ImageResponse, Coroutine[Any, Any, ImageResponse],]:
         """
         Handles image generation requests.
         When _is_async=True, returns a coroutine instead of making the call directly.
@@ -5206,10 +5253,7 @@ class BaseLLMHTTPHandler:
         fake_stream: bool = False,
         litellm_metadata: Optional[Dict[str, Any]] = None,
         api_key: Optional[str] = None,
-    ) -> Union[
-        VideoObject,
-        Coroutine[Any, Any, VideoObject],
-    ]:
+    ) -> Union[VideoObject, Coroutine[Any, Any, VideoObject],]:
         """
         Handles video generation requests.
         When _is_async=True, returns a coroutine instead of making the call directly.
@@ -5247,7 +5291,7 @@ class BaseLLMHTTPHandler:
             model=model,
             litellm_params=litellm_params,
         )
-        
+
         if extra_headers:
             headers.update(extra_headers)
 
@@ -5257,7 +5301,11 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        data, files, api_base = video_generation_provider_config.transform_video_create_request(
+        (
+            data,
+            files,
+            api_base,
+        ) = video_generation_provider_config.transform_video_create_request(
             model=model,
             prompt=prompt,
             video_create_optional_request_params=video_generation_optional_request_params,
@@ -5358,7 +5406,11 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        data, files, api_base = video_generation_provider_config.transform_video_create_request(
+        (
+            data,
+            files,
+            api_base,
+        ) = video_generation_provider_config.transform_video_create_request(
             model=model,
             prompt=prompt,
             api_base=api_base,
@@ -5379,7 +5431,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            #Use JSON when no files, otherwise use form data with files
+            # Use JSON when no files, otherwise use form data with files
             if files is None or len(files) == 0:
                 response = await async_httpx_client.post(
                     url=api_base,
@@ -6033,7 +6085,10 @@ class BaseLLMHTTPHandler:
         )
 
         # Transform the request using the provider config
-        url, data = video_status_provider_config.transform_video_status_retrieve_request(
+        (
+            url,
+            data,
+        ) = video_status_provider_config.transform_video_status_retrieve_request(
             video_id=video_id,
             api_base=api_base,
             litellm_params=litellm_params,
@@ -6067,10 +6122,12 @@ class BaseLLMHTTPHandler:
                     headers=headers,
                 )
 
-            return video_status_provider_config.transform_video_status_retrieve_response(
-                raw_response=response,
-                logging_obj=logging_obj,
-                custom_llm_provider=custom_llm_provider,
+            return (
+                video_status_provider_config.transform_video_status_retrieve_response(
+                    raw_response=response,
+                    logging_obj=logging_obj,
+                    custom_llm_provider=custom_llm_provider,
+                )
             )
 
         except Exception as e:
@@ -6120,7 +6177,10 @@ class BaseLLMHTTPHandler:
         )
 
         # Transform the request using the provider config
-        url, data = video_status_provider_config.transform_video_status_retrieve_request(
+        (
+            url,
+            data,
+        ) = video_status_provider_config.transform_video_status_retrieve_request(
             video_id=video_id,
             api_base=api_base,
             litellm_params=litellm_params,
@@ -6153,10 +6213,12 @@ class BaseLLMHTTPHandler:
                     url=url,
                     headers=headers,
                 )
-            return video_status_provider_config.transform_video_status_retrieve_response(
-                raw_response=response,
-                logging_obj=logging_obj,
-                custom_llm_provider=custom_llm_provider,
+            return (
+                video_status_provider_config.transform_video_status_retrieve_response(
+                    raw_response=response,
+                    logging_obj=logging_obj,
+                    custom_llm_provider=custom_llm_provider,
+                )
             )
 
         except Exception as e:
@@ -6164,7 +6226,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=video_status_provider_config,
             )
-    
+
     ###### CONTAINER HANDLER ######
     def container_create_handler(
         self,
@@ -6204,7 +6266,7 @@ class BaseLLMHTTPHandler:
             headers=extra_headers or {},
             api_key=litellm_params.get("api_key", None),
         )
-        
+
         # Add Content-Type header for JSON requests
         headers["Content-Type"] = "application/json"
 
@@ -6254,7 +6316,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     async def async_container_create_handler(
         self,
         name: str,
@@ -6280,7 +6342,7 @@ class BaseLLMHTTPHandler:
             headers=extra_headers or {},
             api_key=litellm_params.get("api_key", None),
         )
-        
+
         # Add Content-Type header for JSON requests
         headers["Content-Type"] = "application/json"
 
@@ -6330,7 +6392,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     def container_list_handler(
         self,
         container_provider_config: "BaseContainerConfig",
@@ -6422,7 +6484,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     async def async_container_list_handler(
         self,
         container_provider_config: "BaseContainerConfig",
@@ -6499,7 +6561,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     def container_retrieve_handler(
         self,
         container_id: str,
@@ -6555,7 +6617,7 @@ class BaseLLMHTTPHandler:
             litellm_params=litellm_params,
             headers=headers,
         )
-        
+
         # Add any extra query parameters
         if extra_query:
             params.update(extra_query)
@@ -6589,7 +6651,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     async def async_container_retrieve_handler(
         self,
         container_id: str,
@@ -6632,7 +6694,7 @@ class BaseLLMHTTPHandler:
             litellm_params=litellm_params,
             headers=headers,
         )
-        
+
         # Add any extra query parameters
         if extra_query:
             params.update(extra_query)
@@ -6666,7 +6728,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     def container_delete_handler(
         self,
         container_id: str,
@@ -6722,7 +6784,7 @@ class BaseLLMHTTPHandler:
             litellm_params=litellm_params,
             headers=headers,
         )
-        
+
         # Add any extra query parameters
         if extra_query:
             params.update(extra_query)
@@ -6756,7 +6818,7 @@ class BaseLLMHTTPHandler:
                 e=e,
                 provider_config=container_provider_config,
             )
-    
+
     async def async_container_delete_handler(
         self,
         container_id: str,
@@ -6799,7 +6861,7 @@ class BaseLLMHTTPHandler:
             litellm_params=litellm_params,
             headers=headers,
         )
-        
+
         # Add any extra query parameters
         if extra_query:
             params.update(extra_query)
@@ -6848,7 +6910,9 @@ class BaseLLMHTTPHandler:
         timeout: Union[float, httpx.Timeout] = 600,
         _is_async: bool = False,
         client: Optional[Union[HTTPHandler, AsyncHTTPHandler]] = None,
-    ) -> Union["ContainerFileListResponse", Coroutine[Any, Any, "ContainerFileListResponse"]]:
+    ) -> Union[
+        "ContainerFileListResponse", Coroutine[Any, Any, "ContainerFileListResponse"]
+    ]:
         if _is_async:
             return self.async_container_file_list_handler(
                 container_id=container_id,
@@ -7055,7 +7119,10 @@ class BaseLLMHTTPHandler:
         )
 
         # Transform the request using the provider config
-        url, params = container_provider_config.transform_container_file_content_request(
+        (
+            url,
+            params,
+        ) = container_provider_config.transform_container_file_content_request(
             container_id=container_id,
             file_id=file_id,
             api_base=api_base,
@@ -7128,7 +7195,10 @@ class BaseLLMHTTPHandler:
         )
 
         # Transform the request using the provider config
-        url, params = container_provider_config.transform_container_file_content_request(
+        (
+            url,
+            params,
+        ) = container_provider_config.transform_container_file_content_request(
             container_id=container_id,
             file_id=file_id,
             api_base=api_base,
@@ -7202,7 +7272,9 @@ class BaseLLMHTTPHandler:
         )
 
         # Check if provider has async transform method
-        if hasattr(vector_store_provider_config, "atransform_search_vector_store_request"):
+        if hasattr(
+            vector_store_provider_config, "atransform_search_vector_store_request"
+        ):
             (
                 url,
                 request_body,
@@ -7250,7 +7322,6 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-
             response = await async_httpx_client.post(
                 url=url,
                 headers=headers,
@@ -7852,12 +7923,13 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, request_params = (
-            vector_store_files_provider_config.transform_retrieve_vector_store_file_request(
-                vector_store_id=vector_store_id,
-                file_id=file_id,
-                api_base=api_base,
-            )
+        (
+            url,
+            request_params,
+        ) = vector_store_files_provider_config.transform_retrieve_vector_store_file_request(
+            vector_store_id=vector_store_id,
+            file_id=file_id,
+            api_base=api_base,
         )
 
         logging_obj.pre_call(
@@ -7929,12 +8001,13 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, request_params = (
-            vector_store_files_provider_config.transform_retrieve_vector_store_file_request(
-                vector_store_id=vector_store_id,
-                file_id=file_id,
-                api_base=api_base,
-            )
+        (
+            url,
+            request_params,
+        ) = vector_store_files_provider_config.transform_retrieve_vector_store_file_request(
+            vector_store_id=vector_store_id,
+            file_id=file_id,
+            api_base=api_base,
         )
 
         logging_obj.pre_call(
@@ -7993,12 +8066,13 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, request_params = (
-            vector_store_files_provider_config.transform_retrieve_vector_store_file_content_request(
-                vector_store_id=vector_store_id,
-                file_id=file_id,
-                api_base=api_base,
-            )
+        (
+            url,
+            request_params,
+        ) = vector_store_files_provider_config.transform_retrieve_vector_store_file_content_request(
+            vector_store_id=vector_store_id,
+            file_id=file_id,
+            api_base=api_base,
         )
 
         logging_obj.pre_call(
@@ -8073,12 +8147,13 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, request_params = (
-            vector_store_files_provider_config.transform_retrieve_vector_store_file_content_request(
-                vector_store_id=vector_store_id,
-                file_id=file_id,
-                api_base=api_base,
-            )
+        (
+            url,
+            request_params,
+        ) = vector_store_files_provider_config.transform_retrieve_vector_store_file_content_request(
+            vector_store_id=vector_store_id,
+            file_id=file_id,
+            api_base=api_base,
         )
 
         logging_obj.pre_call(
@@ -8296,12 +8371,13 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, request_params = (
-            vector_store_files_provider_config.transform_delete_vector_store_file_request(
-                vector_store_id=vector_store_id,
-                file_id=file_id,
-                api_base=api_base,
-            )
+        (
+            url,
+            request_params,
+        ) = vector_store_files_provider_config.transform_delete_vector_store_file_request(
+            vector_store_id=vector_store_id,
+            file_id=file_id,
+            api_base=api_base,
         )
 
         logging_obj.pre_call(
@@ -8376,12 +8452,13 @@ class BaseLLMHTTPHandler:
             litellm_params=dict(litellm_params),
         )
 
-        url, request_params = (
-            vector_store_files_provider_config.transform_delete_vector_store_file_request(
-                vector_store_id=vector_store_id,
-                file_id=file_id,
-                api_base=api_base,
-            )
+        (
+            url,
+            request_params,
+        ) = vector_store_files_provider_config.transform_delete_vector_store_file_request(
+            vector_store_id=vector_store_id,
+            file_id=file_id,
+            api_base=api_base,
         )
 
         logging_obj.pre_call(
@@ -8877,29 +8954,29 @@ class BaseLLMHTTPHandler:
     ) -> tuple[Optional[Dict], Optional[list]]:
         """
         Helper to prepare multipart/form-data request for skills API.
-        
+
         Args:
             request_body: Request body containing files and other fields
             headers: Request headers
-            
+
         Returns:
             Tuple of (data_dict, files_list) for multipart request, or (None, None) if no files
         """
         if "files" not in request_body or not request_body["files"]:
             return None, None
-            
+
         # Remove content-type header if present - httpx will set it automatically for multipart
         if "content-type" in headers:
             del headers["content-type"]
-        
+
         # Prepare files for multipart upload
         files = []
         for file_obj in request_body["files"]:
             files.append(("files[]", file_obj))
-        
+
         # Prepare data (non-file fields)
         data = {k: v for k, v in request_body.items() if k != "files"}
-        
+
         return data, files
 
     def create_skill_handler(
@@ -8955,7 +9032,7 @@ class BaseLLMHTTPHandler:
             data, files = self._prepare_skill_multipart_request(
                 request_body=request_body, headers=headers
             )
-            
+
             if files is not None:
                 response = sync_httpx_client.post(
                     url=url, headers=headers, data=data, files=files, timeout=timeout
@@ -9015,7 +9092,7 @@ class BaseLLMHTTPHandler:
             data, files = self._prepare_skill_multipart_request(
                 request_body=request_body, headers=headers
             )
-            
+
             if files is not None:
                 response = await async_httpx_client.post(
                     url=url, headers=headers, data=data, files=files, timeout=timeout
@@ -9239,9 +9316,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = await async_httpx_client.get(
-                url=url, headers=headers
-            )
+            response = await async_httpx_client.get(url=url, headers=headers)
         except Exception as e:
             raise self._handle_error(
                 e=e,
@@ -9679,9 +9754,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = await async_httpx_client.get(
-                url=url, headers=headers
-            )
+            response = await async_httpx_client.get(url=url, headers=headers)
         except Exception as e:
             raise self._handle_error(
                 e=e,
@@ -10338,9 +10411,7 @@ class BaseLLMHTTPHandler:
         )
 
         try:
-            response = await async_httpx_client.get(
-                url=url, headers=headers
-            )
+            response = await async_httpx_client.get(url=url, headers=headers)
         except Exception as e:
             raise self._handle_error(
                 e=e,

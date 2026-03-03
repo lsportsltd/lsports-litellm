@@ -2114,11 +2114,7 @@ class InitPassThroughEndpointHelpers:
 
                 # If path matches and method filter is provided, check if method is allowed
                 if path_matches:
-                    if (
-                        method is None
-                        or not route_methods
-                        or method in route_methods
-                    ):
+                    if method is None or not route_methods or method in route_methods:
                         return _registered_pass_through_routes[key]
 
         return None

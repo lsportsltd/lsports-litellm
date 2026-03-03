@@ -116,8 +116,7 @@ def _get_spend_logs_metadata(
     # Filter the metadata dictionary to include only the specified keys
     clean_metadata = SpendLogsMetadata(
         **{  # type: ignore
-            key: metadata.get(key)
-            for key in SpendLogsMetadata.__annotations__.keys()
+            key: metadata.get(key) for key in SpendLogsMetadata.__annotations__.keys()
         }
     )
     clean_metadata["applied_guardrails"] = applied_guardrails
@@ -515,9 +514,7 @@ def _get_session_id_for_spend_log(
     return str(uuid.uuid4())
 
 
-def _get_request_duration_ms(
-    start_time: datetime, end_time: datetime
-) -> Optional[int]:
+def _get_request_duration_ms(start_time: datetime, end_time: datetime) -> Optional[int]:
     """Compute request duration in milliseconds from start and end times."""
     try:
         return int((end_time - start_time).total_seconds() * 1000)
@@ -709,20 +706,20 @@ def _convert_to_json_serializable_dict(
     if max_depth <= 0:
         # Return a placeholder if max depth is exceeded
         return "<max_depth_exceeded>"
-    
+
     if visited is None:
         visited = set()
-    
+
     # Get the object's memory address to track visited objects
     obj_id = id(obj)
     if obj_id in visited:
         # Circular reference detected, return placeholder
         return "<circular_reference>"
-    
+
     # Only track mutable objects (dict, list, objects with __dict__)
     if isinstance(obj, (dict, list)) or hasattr(obj, "__dict__"):
         visited.add(obj_id)
-    
+
     try:
         if isinstance(obj, BaseModel):
             # Use Pydantic's model_dump() instead of pickle
@@ -741,7 +738,9 @@ def _convert_to_json_serializable_dict(
             ]
         elif hasattr(obj, "__dict__"):
             # Handle objects with __dict__ attribute
-            return _convert_to_json_serializable_dict(obj.__dict__, visited, max_depth - 1)
+            return _convert_to_json_serializable_dict(
+                obj.__dict__, visited, max_depth - 1
+            )
         else:
             # Primitives (str, int, float, bool, None) pass through
             return obj
@@ -788,12 +787,12 @@ def _get_proxy_server_request_for_spend_logs_payload(
                         "standard_callback_dynamic_params"
                     ),
                 }
-                
+
                 # If redaction is enabled, convert to serializable dict before redacting
                 if should_redact_message_logging(model_call_details=model_call_details):
                     _request_body = _convert_to_json_serializable_dict(_request_body)
                     perform_redaction(model_call_details=_request_body, result=None)
-            
+
             _request_body = _sanitize_request_body_for_spend_logs_payload(_request_body)
             _request_body_json_str = json.dumps(_request_body, default=str)
             return _request_body_json_str
@@ -848,7 +847,7 @@ def _get_response_for_spend_logs_payload(
                 perform_redaction,
                 should_redact_message_logging,
             )
-            
+
             litellm_params = kwargs.get("litellm_params", {})
             model_call_details = {
                 "litellm_params": litellm_params,
@@ -856,11 +855,13 @@ def _get_response_for_spend_logs_payload(
                     "standard_callback_dynamic_params"
                 ),
             }
-            
+
             # If redaction is enabled, convert to serializable dict before redacting
             if should_redact_message_logging(model_call_details=model_call_details):
                 response_obj = _convert_to_json_serializable_dict(response_obj)
-                response_obj = perform_redaction(model_call_details={}, result=response_obj)
+                response_obj = perform_redaction(
+                    model_call_details={}, result=response_obj
+                )
 
         sanitized_wrapper = _sanitize_request_body_for_spend_logs_payload(
             {"response": response_obj}
@@ -882,7 +883,7 @@ def _should_store_prompts_and_responses_in_spend_logs() -> bool:
 
     # Check general_settings (from DB or proxy_config.yaml)
     store_prompts_value = general_settings.get("store_prompts_in_spend_logs")
-    
+
     # Normalize case: handle True/true/TRUE, False/false/FALSE, None/null
     if store_prompts_value is True:
         return True
@@ -890,7 +891,7 @@ def _should_store_prompts_and_responses_in_spend_logs() -> bool:
         # Case-insensitive string comparison
         if store_prompts_value.lower() == "true":
             return True
-    
+
     # Also check environment variable
     return get_secret_bool("STORE_PROMPTS_IN_SPEND_LOGS") is True
 

@@ -63,6 +63,7 @@ def load_openapi_spec(filepath: str) -> Dict[str, Any]:
             raise
     return asyncio.run(load_openapi_spec_async(filepath))
 
+
 async def load_openapi_spec_async(filepath: str) -> Dict[str, Any]:
     if filepath.startswith("http://") or filepath.startswith("https://"):
         client = get_async_httpx_client(llm_provider=httpxSpecialProvider.MCP)
@@ -90,20 +91,31 @@ def get_base_url(spec: Dict[str, Any], spec_path: Optional[str] = None) -> str:
         scheme = spec.get("schemes", ["https"])[0]
         base_path = spec.get("basePath", "")
         return f"{scheme}://{spec['host']}{base_path}"
-    
+
     # Fallback: derive base URL from spec_path if it's a URL
-    if spec_path and (spec_path.startswith("http://") or spec_path.startswith("https://")):
-        for suffix in ["/openapi.json", "/openapi.yaml", "/swagger.json", "/swagger.yaml"]:
+    if spec_path and (
+        spec_path.startswith("http://") or spec_path.startswith("https://")
+    ):
+        for suffix in [
+            "/openapi.json",
+            "/openapi.yaml",
+            "/swagger.json",
+            "/swagger.yaml",
+        ]:
             if spec_path.endswith(suffix):
-                base_url = spec_path[:-len(suffix)]
-                verbose_logger.info(f"No server info in OpenAPI spec. Using derived base URL: {base_url}")
+                base_url = spec_path[: -len(suffix)]
+                verbose_logger.info(
+                    f"No server info in OpenAPI spec. Using derived base URL: {base_url}"
+                )
                 return base_url
-        
+
         if spec_path.split("/")[-1].endswith((".json", ".yaml", ".yml")):
             base_url = "/".join(spec_path.split("/")[:-1])
-            verbose_logger.info(f"No server info in OpenAPI spec. Using derived base URL: {base_url}")
+            verbose_logger.info(
+                f"No server info in OpenAPI spec. Using derived base URL: {base_url}"
+            )
             return base_url
-    
+
     return ""
 
 

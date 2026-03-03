@@ -51,7 +51,9 @@ async def list_tools(
         )
 
     try:
-        tools = await db_list_tools(prisma_client=prisma_client, call_policy=call_policy)
+        tools = await db_list_tools(
+            prisma_client=prisma_client, call_policy=call_policy
+        )
         return ToolListResponse(tools=tools, total=len(tools))
     except Exception as e:
         verbose_proxy_logger.exception("Error listing tools: %s", e)
@@ -85,9 +87,7 @@ async def get_tool(
     try:
         tool = await db_get_tool(prisma_client=prisma_client, tool_name=tool_name)
         if tool is None:
-            raise HTTPException(
-                status_code=404, detail=f"Tool '{tool_name}' not found"
-            )
+            raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
         return tool
     except HTTPException:
         raise
@@ -135,7 +135,8 @@ async def update_tool_policy(
         )
         if updated is None:
             raise HTTPException(
-                status_code=500, detail=f"Failed to update policy for tool '{data.tool_name}'"
+                status_code=500,
+                detail=f"Failed to update policy for tool '{data.tool_name}'",
             )
         return ToolPolicyUpdateResponse(
             tool_name=updated.tool_name,

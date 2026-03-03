@@ -545,8 +545,7 @@ class _OPTIONAL_PresidioPIIMasking(CustomGuardrail):
 
         filtered_results: List[PresidioAnalyzeResponseItem] = []
         deny_list_strings = [
-            getattr(x, "value", str(x))
-            for x in self.presidio_entities_deny_list
+            getattr(x, "value", str(x)) for x in self.presidio_entities_deny_list
         ]
         for item in analyze_results:
             entity_type = item.get("entity_type")

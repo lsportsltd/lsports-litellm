@@ -780,9 +780,9 @@ def function_setup(  # noqa: PLR0915
         coroutine_checker = get_coroutine_checker_fn()
 
         ## DYNAMIC CALLBACKS ##
-        dynamic_callbacks: Optional[List[Union[str, Callable, "CustomLogger"]]] = (
-            kwargs.pop("callbacks", None)
-        )
+        dynamic_callbacks: Optional[
+            List[Union[str, Callable, "CustomLogger"]]
+        ] = kwargs.pop("callbacks", None)
         all_callbacks = get_dynamic_callbacks(dynamic_callbacks=dynamic_callbacks)
 
         if len(all_callbacks) > 0:
@@ -1454,10 +1454,12 @@ def client(original_function):  # noqa: PLR0915
                 logging_obj, kwargs = function_setup(
                     original_function.__name__, rules_obj, start_time, *args, **kwargs
                 )
-            
+
             # Type assertion: logging_obj is guaranteed to be non-None after function_setup
-            assert logging_obj is not None, "logging_obj should not be None after function_setup"
-            
+            assert (
+                logging_obj is not None
+            ), "logging_obj should not be None after function_setup"
+
             ## LOAD CREDENTIALS
             load_credentials_from_list(kwargs)
             kwargs["litellm_logging_obj"] = logging_obj
@@ -1669,9 +1671,9 @@ def client(original_function):  # noqa: PLR0915
                         exception=e,
                         retry_policy=kwargs.get("retry_policy"),
                     )
-                    kwargs["retry_policy"] = (
-                        reset_retry_policy()
-                    )  # prevent infinite loops
+                    kwargs[
+                        "retry_policy"
+                    ] = reset_retry_policy()  # prevent infinite loops
                 litellm.num_retries = (
                     None  # set retries to None to prevent infinite loops
                 )
@@ -1718,9 +1720,9 @@ def client(original_function):  # noqa: PLR0915
                         exception=e,
                         retry_policy=kwargs.get("retry_policy"),
                     )
-                    kwargs["retry_policy"] = (
-                        reset_retry_policy()
-                    )  # prevent infinite loops
+                    kwargs[
+                        "retry_policy"
+                    ] = reset_retry_policy()  # prevent infinite loops
                 litellm.num_retries = (
                     None  # set retries to None to prevent infinite loops
                 )
@@ -1753,7 +1755,9 @@ def client(original_function):  # noqa: PLR0915
         print_args_passed_to_litellm(original_function, args, kwargs)
         start_time = datetime.datetime.now()
         result = None
-        _update_response_metadata = getattr(sys.modules[__name__], "update_response_metadata")
+        _update_response_metadata = getattr(
+            sys.modules[__name__], "update_response_metadata"
+        )
         logging_obj: Optional[LiteLLMLoggingObject] = kwargs.get(
             "litellm_logging_obj", None
         )
@@ -1776,9 +1780,11 @@ def client(original_function):  # noqa: PLR0915
                 logging_obj, kwargs = function_setup(
                     original_function.__name__, rules_obj, start_time, *args, **kwargs
                 )
-            
+
             # Type assertion: logging_obj is guaranteed to be non-None after function_setup
-            assert logging_obj is not None, "logging_obj should not be None after function_setup"
+            assert (
+                logging_obj is not None
+            ), "logging_obj should not be None after function_setup"
 
             modified_kwargs = await async_pre_call_deployment_hook(kwargs, call_type)
             if modified_kwargs is not None:
@@ -2082,12 +2088,14 @@ def _is_async_request(
     return False
 
 
-_STREAMING_CALL_TYPES = frozenset({
-    CallTypes.generate_content_stream,
-    CallTypes.agenerate_content_stream,
-    CallTypes.generate_content_stream.value,
-    CallTypes.agenerate_content_stream.value,
-})
+_STREAMING_CALL_TYPES = frozenset(
+    {
+        CallTypes.generate_content_stream,
+        CallTypes.agenerate_content_stream,
+        CallTypes.generate_content_stream.value,
+        CallTypes.agenerate_content_stream.value,
+    }
+)
 
 
 def _is_streaming_request(
@@ -3666,10 +3674,10 @@ def pre_process_non_default_params(
 
     if "response_format" in non_default_params:
         if provider_config is not None:
-            non_default_params["response_format"] = (
-                provider_config.get_json_schema_from_pydantic_object(
-                    response_format=non_default_params["response_format"]
-                )
+            non_default_params[
+                "response_format"
+            ] = provider_config.get_json_schema_from_pydantic_object(
+                response_format=non_default_params["response_format"]
             )
         else:
             non_default_params["response_format"] = type_to_response_format_param(
@@ -3798,16 +3806,16 @@ def pre_process_optional_params(
                     True  # so that main.py adds the function call to the prompt
                 )
                 if "tools" in non_default_params:
-                    optional_params["functions_unsupported_model"] = (
-                        non_default_params.pop("tools")
-                    )
+                    optional_params[
+                        "functions_unsupported_model"
+                    ] = non_default_params.pop("tools")
                     non_default_params.pop(
                         "tool_choice", None
                     )  # causes ollama requests to hang
                 elif "functions" in non_default_params:
-                    optional_params["functions_unsupported_model"] = (
-                        non_default_params.pop("functions")
-                    )
+                    optional_params[
+                        "functions_unsupported_model"
+                    ] = non_default_params.pop("functions")
             elif (
                 litellm.add_function_to_prompt
             ):  # if user opts to add it to prompt instead
@@ -4964,9 +4972,9 @@ def get_response_string(response_obj: Union[ModelResponse, ModelResponseStream])
             return delta if isinstance(delta, str) else ""
 
     # Handle standard ModelResponse and ModelResponseStream
-    _choices: Union[List[Union[Choices, StreamingChoices]], List[StreamingChoices]] = (
-        response_obj.choices
-    )
+    _choices: Union[
+        List[Union[Choices, StreamingChoices]], List[StreamingChoices]
+    ] = response_obj.choices
 
     # Use list accumulation to avoid O(n^2) string concatenation across choices
     response_parts: List[str] = []
@@ -5837,7 +5845,7 @@ def get_model_info(
                 _model_info[key] = value  # type: ignore
 
     # if verbose_logger.isEnabledFor(logging.DEBUG):
-        # verbose_logger.debug(f"model_info: {_model_info}")
+    # verbose_logger.debug(f"model_info: {_model_info}")
 
     returned_model_info = ModelInfo(
         **_model_info, supported_openai_params=supported_openai_params
@@ -6180,8 +6188,10 @@ def validate_environment(  # noqa: PLR0915
                 "AWS_ROLE_ARN" in os.environ
                 or "AWS_PROFILE" in os.environ
                 or "AWS_WEB_IDENTITY_TOKEN_FILE" in os.environ
-                or "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" in os.environ  # ECS task role
-                or "AWS_CONTAINER_CREDENTIALS_FULL_URI" in os.environ  # ECS/Fargate full URI credential delivery
+                or "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+                in os.environ  # ECS task role
+                or "AWS_CONTAINER_CREDENTIALS_FULL_URI"
+                in os.environ  # ECS/Fargate full URI credential delivery
             ):
                 keys_in_environment = True
             else:
@@ -7458,13 +7468,13 @@ def is_cached_message(message: AllMessageValues) -> bool:
     Used for anthropic/gemini context caching.
 
     Follows the anthropic format {"cache_control": {"type": "ephemeral"}}
-    
+
     Can be disabled globally by setting litellm.disable_anthropic_gemini_context_caching_transform = True
     """
     # Check if context caching is disabled globally
     if litellm.disable_anthropic_gemini_context_caching_transform is True:
         return False
-    
+
     if "content" not in message:
         return False
 
@@ -7981,6 +7991,7 @@ class ProviderConfigManager:
     def _get_azure_ai_config(model: str) -> BaseConfig:
         """Get Azure AI config based on model type."""
         from litellm.llms.azure_ai.common_utils import AzureFoundryModelInfo
+
         return AzureFoundryModelInfo.get_azure_ai_config_for_model(model)
 
     @staticmethod

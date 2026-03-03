@@ -245,11 +245,13 @@ class DBSpendUpdateWriter:
             # --- MCP tool calls ---
             sl_object = kwargs.get("standard_logging_object")
             if sl_object is not None:
-                mcp_metadata = (
-                    sl_object.get("metadata", {}) or {}
-                ).get("mcp_tool_call_metadata")
+                mcp_metadata = (sl_object.get("metadata", {}) or {}).get(
+                    "mcp_tool_call_metadata"
+                )
                 if mcp_metadata and isinstance(mcp_metadata, dict):
-                    tool_name = mcp_metadata.get("namespaced_tool_name") or mcp_metadata.get("name")
+                    tool_name = mcp_metadata.get(
+                        "namespaced_tool_name"
+                    ) or mcp_metadata.get("name")
                     mcp_server_name = mcp_metadata.get("mcp_server_name")
                     if tool_name:
                         _enqueue(tool_name, origin=mcp_server_name or "user_defined")
@@ -280,7 +282,9 @@ class DBSpendUpdateWriter:
                     _enqueue(name)
 
             # --- Response tool_calls (OpenAI format; Anthropic pass-through converts tool_use here) ---
-            if completion_response is not None and hasattr(completion_response, "choices"):
+            if completion_response is not None and hasattr(
+                completion_response, "choices"
+            ):
                 for choice in completion_response.choices or []:
                     message = getattr(choice, "message", None)
                     if message is None:
@@ -768,19 +772,46 @@ class DBSpendUpdateWriter:
                     daily_end_user_spend_update_transactions,
                     daily_agent_spend_update_transactions,
                     daily_tag_spend_update_transactions,
-                ) = await self.redis_update_buffer.get_all_transactions_from_redis_buffer_pipeline()
+                ) = (
+                    await self.redis_update_buffer.get_all_transactions_from_redis_buffer_pipeline()
+                )
 
                 if db_spend_update_transactions is not None:
                     verbose_proxy_logger.info(
                         "Spend tracking - committing spend updates from Redis to DB: "
                         "keys=%d, users=%d, teams=%d, orgs=%d, end_users=%d, team_members=%d, tags=%d",
-                        len(db_spend_update_transactions.get("key_list_transactions") or {}),
-                        len(db_spend_update_transactions.get("user_list_transactions") or {}),
-                        len(db_spend_update_transactions.get("team_list_transactions") or {}),
-                        len(db_spend_update_transactions.get("org_list_transactions") or {}),
-                        len(db_spend_update_transactions.get("end_user_list_transactions") or {}),
-                        len(db_spend_update_transactions.get("team_member_list_transactions") or {}),
-                        len(db_spend_update_transactions.get("tag_list_transactions") or {}),
+                        len(
+                            db_spend_update_transactions.get("key_list_transactions")
+                            or {}
+                        ),
+                        len(
+                            db_spend_update_transactions.get("user_list_transactions")
+                            or {}
+                        ),
+                        len(
+                            db_spend_update_transactions.get("team_list_transactions")
+                            or {}
+                        ),
+                        len(
+                            db_spend_update_transactions.get("org_list_transactions")
+                            or {}
+                        ),
+                        len(
+                            db_spend_update_transactions.get(
+                                "end_user_list_transactions"
+                            )
+                            or {}
+                        ),
+                        len(
+                            db_spend_update_transactions.get(
+                                "team_member_list_transactions"
+                            )
+                            or {}
+                        ),
+                        len(
+                            db_spend_update_transactions.get("tag_list_transactions")
+                            or {}
+                        ),
                     )
                     await self._commit_spend_updates_to_db(
                         prisma_client=prisma_client,

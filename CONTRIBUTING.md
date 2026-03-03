@@ -30,6 +30,15 @@ Before contributing code to LiteLLM, you must sign our [Contributor License Agre
 
 ## Quick Start
 
+### Prerequisites
+
+- **Python 3.12+**
+- **[Poetry](https://python-poetry.org/docs/#installation)** -- install with:
+  ```bash
+  curl -sSL https://install.python-poetry.org | python3 -
+  ```
+  After installation, ensure `poetry` is on your `PATH` (the installer will print instructions).
+
 ### 1. Setup Your Local Development Environment
 
 ```bash

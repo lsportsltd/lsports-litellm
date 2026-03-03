@@ -1,0 +1,55 @@
+image:
+  repository: ''
+  pullPolicy: IfNotPresent
+  tag: ''
+serviceAccount:
+  create: false
+  name: ''
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+  - number: 4000
+    targetPort: 4000
+    name: http
+livenessProbe:
+  httpGet:
+    path: /health/liveness
+    port: 4000
+  initialDelaySeconds: 0
+  timeoutSeconds: 3
+  periodSeconds: 10
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /health/readiness
+    port: 4000
+  initialDelaySeconds: 0
+  timeoutSeconds: 3
+  periodSeconds: 5
+startupProbe:
+  httpGet:
+    path: /health/liveness
+    port: 4000
+  initialDelaySeconds: 15
+  timeoutSeconds: 3
+  periodSeconds: 10
+  failureThreshold: 30
+env:
+  APP_NAME: innovation-litellm
+  OPENAI_API_KEY: ""
+  OPENAI_BASE_URL: ""
+  COHERE_API_KEY: ""
+  OR_SITE_URL: ""
+  OR_APP_NAME: "LiteLLM Example app"
+  OR_API_KEY: ""
+  AZURE_API_BASE: ""
+  AZURE_API_VERSION: ""
+  AZURE_API_KEY: ""
+  REPLICATE_API_KEY: ""
+  REPLICATE_API_TOKEN: ""
+  ANTHROPIC_API_KEY: ""
+  INFISICAL_TOKEN: ""
+  NOVITA_API_KEY: ""
+  INFINITY_API_KEY: ""
+  STORE_MODEL_IN_DB: "True"

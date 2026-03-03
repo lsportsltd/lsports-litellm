@@ -415,7 +415,15 @@ We welcome contributions to LiteLLM! Whether you're fixing bugs, adding features
 
 ## Quick Start for Contributors
 
-This requires poetry to be installed.
+### Prerequisites
+
+- **Python 3.12+**
+- **[Poetry](https://python-poetry.org/docs/#installation)** -- install with:
+  ```bash
+  curl -sSL https://install.python-poetry.org | python3 -
+  ```
+
+### Setup & Development
 
 ```bash
 git clone https://github.com/BerriAI/litellm.git

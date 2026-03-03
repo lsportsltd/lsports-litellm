@@ -148,9 +148,7 @@ class _PROXY_MaxIterationsHandler(CustomLogger):
 
         return None
 
-    def _get_max_iterations(
-        self, user_api_key_dict: UserAPIKeyAuth
-    ) -> Optional[int]:
+    def _get_max_iterations(self, user_api_key_dict: UserAPIKeyAuth) -> Optional[int]:
         """Extract max_iterations from key metadata."""
         metadata = user_api_key_dict.metadata or {}
         max_iterations = metadata.get("max_iterations")

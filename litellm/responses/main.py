@@ -184,10 +184,13 @@ async def aresponses_api_with_mcp(
     if secret_fields and isinstance(secret_fields, dict):
         from litellm.responses.utils import ResponsesAPIRequestUtils
 
-        mcp_auth_header, mcp_server_auth_headers, _, _ = (
-            ResponsesAPIRequestUtils.extract_mcp_headers_from_request(
-                secret_fields=secret_fields, tools=tools
-            )
+        (
+            mcp_auth_header,
+            mcp_server_auth_headers,
+            _,
+            _,
+        ) = ResponsesAPIRequestUtils.extract_mcp_headers_from_request(
+            secret_fields=secret_fields, tools=tools
         )
 
     # Get original MCP tools (for events) and OpenAI tools (for LLM) by reusing existing methods

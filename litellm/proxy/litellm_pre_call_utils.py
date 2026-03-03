@@ -844,9 +844,7 @@ async def add_litellm_data_to_request(  # noqa: PLR0915
         SecretFields,
     )
 
-    _raw_headers: Dict[str, str] = RedactedDict(
-        _safe_get_request_headers(request)
-    )
+    _raw_headers: Dict[str, str] = RedactedDict(_safe_get_request_headers(request))
 
     forward_llm_auth = False
     if general_settings:
