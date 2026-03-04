@@ -24,18 +24,18 @@ trigger:
 stages:
   - template: kubernetes/ci-docker.yaml@pipeline-templates
     parameters:
-      serviceName: innovation-market
+      serviceName: innovation-litellm
       group: innovation
-      product: innovation-market
+      product: innovation-litellm
       team: innovation
       domain: shared
       cloud: gcp
 
   - template: kubernetes/deploy.yml@pipeline-templates
     parameters:
-      serviceName: innovation-market
+      serviceName: innovation-litellm
       group: innovation
-      product: innovation-market
+      product: innovation-litellm
       team: innovation
       domain: shared
       cloud: gcp
