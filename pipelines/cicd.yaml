@@ -1,0 +1,44 @@
+parameters:
+  - name: godo_branch
+    displayName: 'Godo Branch'
+    default: main
+
+resources:
+  repositories:
+    - repository: pipeline-templates
+      type: github
+      name: lsportsltd/devops-pipeline-templates
+      endpoint: lsportsltd
+    - repository: manifests
+      type: github
+      name: lsportsltd/devops-manifests
+      endpoint: lsportsltd
+    - repository: deployments
+      type: github
+      name: lsportsltd/shared-deployments
+      endpoint: lsportsltd
+
+trigger:
+  - main
+
+stages:
+  - template: kubernetes/ci-docker.yaml@pipeline-templates
+    parameters:
+      serviceName: innovation-litellm
+      group: innovation
+      product: innovation-litellm
+      team: innovation
+      domain: shared
+      cloud: gcp
+
+  - template: kubernetes/deploy.yml@pipeline-templates
+    parameters:
+      serviceName: innovation-litellm
+      group: innovation
+      product: innovation-litellm
+      team: innovation
+      domain: shared
+      cloud: gcp
+      safety: true
+      deploy_k8s: true
+      godo_branch: ${{parameters.godo_branch}}
