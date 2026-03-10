@@ -32,4 +32,5 @@ affinity:
 envSecretGcp:
   LITELLM_MASTER_KEY: _innovation_litellm_master_key
   DATABASE_URL: _innovation_litellm_database_url
+  LITELLM_LICENSE: _innovation_litellm_license
   
