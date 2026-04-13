@@ -1,4 +1,4 @@
-FROM docker.litellm.ai/berriai/litellm:main-stable
+FROM docker.litellm.ai/berriai/litellm:v1.82.3-stable.patch.4
 
 RUN pip install --no-cache-dir google-cloud-aiplatform
 
