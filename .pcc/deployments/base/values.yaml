@@ -39,7 +39,9 @@ startupProbe:
   periodSeconds: 10
   failureThreshold: 30
 env:
-  APP_NAME: innovation-litellm
+  APP_NAME: stm-litellm
+  NO_DOCS: "true"
+  NO_REDOC: "true"
   OPENAI_API_KEY: ""
   OPENAI_BASE_URL: ""
   COHERE_API_KEY: ""

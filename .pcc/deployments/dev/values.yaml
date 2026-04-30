@@ -1,15 +1,15 @@
 replicaCount: 1
 resources:
   requests:
-    memory: "4Gi"
-    cpu: "2"
+    memory: "3.2Gi"
+    cpu: "1.6"
   limits:
     memory: "8Gi"
     cpu: "4"
 ingress:
 - enabled: true
   hosts:
-  - host: innovation-litellm.dev-innovation.lsports-gcp.cloud
+  - host: stm-litellm.dev-trd.lsports-gcp.cloud
     paths:
     - path: /
       backend:
@@ -30,7 +30,6 @@ affinity:
           values:
           - general
 envSecretGcp:
-  LITELLM_MASTER_KEY: _innovation_litellm_master_key
-  DATABASE_URL: _innovation_litellm_database_url
-  LITELLM_LICENSE: _innovation_litellm_license
-  
+  LITELLM_MASTER_KEY: _manual_stm_litellm_master_key
+  DATABASE_URL: _manual_stm_litellm_database_url
+  LITELLM_LICENSE: _manual_stm_litellm_license
