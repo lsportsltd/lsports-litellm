@@ -1,0 +1,107 @@
+# Profanity / blocked-words list
+# Referenced by guardrails: profanity_bias_input, profanity_stream_filter
+#
+# Add entries following the LiteLLM blocked_words format:
+#
+#   blocked_words:
+#     - keyword: "example_word"
+#       action: BLOCK
+#
+# Baked to /app/profanity_list.yaml in the image; docker-compose can bind-mount a host file
+# over the same path to change words without rebuild.
+#
+# Matching is case-insensitive substring matching by LiteLLM's content filter,
+# so entries are listed in lowercase base form. Plurals/variants of the same
+# stem (e.g. "fucking", "fucker") are caught by the base stem.
+
+blocked_words:
+  # ── F-word family ────────────────────────────────────────────────────────
+  - keyword: "fuck"
+    action: BLOCK
+  - keyword: "motherfucker"
+    action: BLOCK
+  - keyword: "fuckhead"
+    action: BLOCK
+
+  # ── S-word family ────────────────────────────────────────────────────────
+  - keyword: "shit"
+    action: BLOCK
+  - keyword: "bullshit"
+    action: BLOCK
+  - keyword: "shithead"
+    action: BLOCK
+
+  # ── B-word family ────────────────────────────────────────────────────────
+  - keyword: "bitch"
+    action: BLOCK
+  - keyword: "bastard"
+    action: BLOCK
+  - keyword: "bollocks"
+    action: BLOCK
+
+  # ── Other common profanity ───────────────────────────────────────────────
+  - keyword: "asshole"
+    action: BLOCK
+  - keyword: "arsehole"
+    action: BLOCK
+  - keyword: "dickhead"
+    action: BLOCK
+  - keyword: "cunt"
+    action: BLOCK
+  - keyword: "twat"
+    action: BLOCK
+  - keyword: "wanker"
+    action: BLOCK
+  - keyword: "prick"
+    action: BLOCK
+  - keyword: "cock"
+    action: BLOCK
+  - keyword: "pussy"
+    action: BLOCK
+  - keyword: "douchebag"
+    action: BLOCK
+  - keyword: "jackass"
+    action: BLOCK
+  - keyword: "piss off"
+    action: BLOCK
+
+  # ── Slurs (racial / homophobic / ableist) ────────────────────────────────
+  # Hard-block regardless of context.
+  - keyword: "nigger"
+    action: BLOCK
+  - keyword: "nigga"
+    action: BLOCK
+  - keyword: "chink"
+    action: BLOCK
+  - keyword: "spic"
+    action: BLOCK
+  - keyword: "kike"
+    action: BLOCK
+  - keyword: "gook"
+    action: BLOCK
+  - keyword: "wetback"
+    action: BLOCK
+  - keyword: "raghead"
+    action: BLOCK
+  - keyword: "towelhead"
+    action: BLOCK
+  - keyword: "faggot"
+    action: BLOCK
+  - keyword: "fag"
+    action: BLOCK
+  - keyword: "dyke"
+    action: BLOCK
+  - keyword: "tranny"
+    action: BLOCK
+  - keyword: "retard"
+    action: BLOCK
+  - keyword: "retarded"
+    action: BLOCK
+
+  # ── Sexual content ───────────────────────────────────────────────────────
+  - keyword: "blowjob"
+    action: BLOCK
+  - keyword: "handjob"
+    action: BLOCK
+  - keyword: "jerk off"
+    action: BLOCK

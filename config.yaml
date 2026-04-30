@@ -1,9 +1,263 @@
+environment_variables:
+  # Swagger UI / Redoc URLs are fixed at process start from os.environ (see LiteLLM
+  # proxy_cli import order). Set NO_DOCS and NO_REDOC on the container/Pod env too.
+  NO_DOCS: true
+  NO_REDOC: true
+
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
   database_url: os.environ/DATABASE_URL
   store_model_in_db: true
+  forward_client_headers_to_llm_api: true
+  block_robots: true
+
+  admin_only_routes:
+    - "/key/generate"
+    - "/key/delete"
+    - "/user/new"
+    - "/model/new"
+    - "/spend/*"
+    - "/ui/*"
 
 litellm_settings:
   drop_params: true
   set_verbose: false
   store_audit_logs: true
+  redact_messages_in_exceptions: true
+  redact_user_api_key_info: true
+  filter_invalid_headers: true
+  log_raw_request_response: false
+  # Module-level HTTP client timeout (seconds). Default in library is very high; this caps hung calls.
+  request_timeout: 300
+  # Path is relative to the config file directory (/app -> src/llm/callbacks.py).
+  callbacks:
+    - src.llm.callbacks.sports_betting_guard_instance
+
+# -----------------------------------------------------------------------------------------
+# Models — match Proxy UI: `custom_llm_provider: vertex_ai`, bare Vertex `model` id.
+# Vertex IDs are exact strings (e.g. gemini-3.1-pro-preview uses a dot "3.1", not "3-1").
+# ADC: no api_key. With store_model_in_db: true, do not duplicate the same public
+# model_name or routing alias as a DB row (pick config XOR UI for each alias).
+# -----------------------------------------------------------------------------------------
+# model_list:
+#   - model_name: gemini-pro
+#     litellm_params:
+#       model: gemini-3.1-pro-preview
+#       custom_llm_provider: vertex_ai
+#       vertex_project: lsports-dev-trd
+#       vertex_location: global
+#       use_in_pass_through: false
+#       use_litellm_proxy: false
+#       merge_reasoning_content_in_choices: false
+#   - model_name: gemini-flash-lite
+#     litellm_params:
+#       model: gemini-3.1-flash-lite-preview
+#       custom_llm_provider: vertex_ai
+#       vertex_project: lsports-dev-trd
+#       vertex_location: global
+#       use_in_pass_through: false
+#       use_litellm_proxy: false
+#       merge_reasoning_content_in_choices: false
+#   - model_name: gemini-flash
+#     litellm_params:
+#       model: gemini-3-flash-preview
+#       custom_llm_provider: vertex_ai
+#       vertex_project: lsports-dev-trd
+#       vertex_location: global
+#       use_in_pass_through: false
+#       use_litellm_proxy: false
+#       merge_reasoning_content_in_choices: false
+#   - model_name: nano-banana
+#     litellm_params:
+#       model: gemini-3-pro-image-preview
+#       custom_llm_provider: vertex_ai
+#       vertex_project: lsports-dev-trd
+#       vertex_location: global
+#       use_in_pass_through: false
+#       use_litellm_proxy: false
+#       merge_reasoning_content_in_choices: false
+
+# -----------------------------------------------------------------------------------------
+# Guardrails
+# -----------------------------------------------------------------------------------------
+# guardrails:
+#   # 1. PII input filter
+#   - guardrail_name: pii_input_filter
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: pre_call
+#       patterns:
+#         - pattern_type: prebuilt
+#           pattern_name: email
+#           action: MASK          # user shares email → redact before LLM sees it
+#         - pattern_type: prebuilt
+#           pattern_name: us_phone
+#           action: MASK
+#         - pattern_type: prebuilt
+#           pattern_name: us_ssn
+#           action: BLOCK         # SSN in a betting chatbot = wrong channel entirely
+#         - pattern_type: prebuilt
+#           pattern_name: visa
+#           action: BLOCK
+#         - pattern_type: prebuilt
+#           pattern_name: mastercard
+#           action: BLOCK
+
+#   # 2. Profanity & hate speech filter
+#   - guardrail_name: profanity_bias_input
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: pre_call
+#       categories:
+#         - category: bias_gender
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+#         - category: bias_racial
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: high   # high to avoid false positives on team names
+#         - category: bias_religious
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+#         - category: harmful_violence
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+#       # Same app root as --config /app/config.yaml; LiteLLM opens this path as-is (no path rewrite).
+#       blocked_words_file: /app/profanity_list.yaml
+
+#   # 3. Topic scope / off-topic block
+#   #    Note: for a graceful assistant reply (200 instead of 400) the custom
+#   #    SportsBettingGuard hook in src/llm/callbacks.py handles off-topic
+#   #    detection and returns a friendly message instead of raising an error.
+#   - guardrail_name: topic_scope_input
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: pre_call
+#       blocked_words:
+#         - keyword: "medical advice"
+#           action: BLOCK
+#         - keyword: "legal advice"
+#           action: BLOCK
+#         - keyword: "investment advice"
+#           action: BLOCK
+#       categories:
+#         - category: denied_financial_advice
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+#         - category: denied_legal_advice
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+#         - category: denied_medical_advice
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+
+#   # 4. Competitor data isolation (custom regex)
+#   - guardrail_name: competitor_isolation_input
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: pre_call
+#       patterns:
+#         - pattern_type: regex
+#           pattern: '\b(CompetitorA|CompetitorB|RivalBrand)\b'
+#           name: competitor_brand
+#           action: BLOCK
+#       blocked_words:
+#         - keyword: "api_key"
+#           action: BLOCK
+#         - keyword: "internal_odds"
+#           action: BLOCK
+
+#   # ── Layer 2: during_call ─────────────────────────────────────────────────
+
+#   # 5. Streaming PII redaction
+#   - guardrail_name: pii_stream_filter
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: during_call
+#       patterns:
+#         - pattern_type: prebuilt
+#           pattern_name: email
+#           action: MASK
+#         - pattern_type: prebuilt
+#           pattern_name: us_phone
+#           action: MASK
+#         - pattern_type: prebuilt
+#           pattern_name: visa
+#           action: BLOCK
+
+#   # 6. Streaming profanity guard
+#   - guardrail_name: profanity_stream_filter
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: during_call
+#       blocked_words_file: /app/profanity_list.yaml
+#       categories:
+#         - category: harmful_violence
+#           enabled: true
+#           action: BLOCK
+#           severity_threshold: medium
+
+#   # ── Layer 3: post_call ───────────────────────────────────────────────────
+
+#   # 7. Output PII & credential check
+#   - guardrail_name: pii_output_filter
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: post_call
+#       patterns:
+#         - pattern_type: prebuilt
+#           pattern_name: email
+#           action: MASK
+#         - pattern_type: prebuilt
+#           pattern_name: us_phone
+#           action: MASK
+#         - pattern_type: prebuilt
+#           pattern_name: aws_access_key
+#           action: BLOCK
+#         - pattern_type: prebuilt
+#           pattern_name: github_token
+#           action: BLOCK
+
+#   # 8. Competitor data in output
+#   - guardrail_name: competitor_isolation_output
+#     litellm_params:
+#       guardrail: litellm_content_filter
+#       mode: post_call
+#       patterns:
+#         - pattern_type: regex
+#           pattern: '\b(CompetitorA|CompetitorB|RivalBrand)\b'
+#           name: competitor_brand
+#           action: MASK          # MASK not BLOCK — the response is already generated
+#       blocked_words:
+#         - keyword: "internal_odds"
+#           action: BLOCK
+#         - keyword: "customer_database"
+#           action: BLOCK
+
+# # ---------------------------------------------------------------------------
+# # Policy grouping — ties all guardrails into a single named policy applied
+# # by default to every API key / customer.
+# # ---------------------------------------------------------------------------
+
+# policies:
+#   sport-betting-baseline:
+#     guardrails:
+#       add:
+#         - pii_input_filter
+#         - profanity_bias_input
+#         - topic_scope_input
+#         - competitor_isolation_input
+#         - pii_stream_filter
+#         - profanity_stream_filter
+#         - pii_output_filter
+#         - competitor_isolation_output
+
+# policy_attachments:
+#   - policy: sport-betting-baseline
+#     scope: "*"          # applies to every customer/key by default
