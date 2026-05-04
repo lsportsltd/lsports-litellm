@@ -2,11 +2,11 @@ replicaCount: 1
 
 resources:
   requests:
-    memory: "3.2Gi"
-    cpu: "1.6"
+    memory: "512Mi"
+    cpu: "500m"
   limits:
-    memory: "8Gi"
-    cpu: "4"
+    memory: "2Gi"
+    cpu: "2000m"
 
 ingress:
   enabled: true
@@ -75,3 +75,12 @@ envSecretGcp:
   LITELLM_MASTER_KEY: _manual_stm_litellm_master_key
   DATABASE_URL: _manual_stm_litellm_database_url
   LITELLM_LICENSE: _manual_stm_litellm_license
+  FRONTEGG_AUTHORIZATION_TOKEN: _manual_stm_litellm_authorization_token
+  FRONTEGG_CLIENT_ID: _manual_stm_frontegg_client_id
+  FRONTEGG_TOKEN_URL: _manual_stm_litellm_token_url
+env:
+  ACE_BOOST_MCP_URL: https://stm-mcp-customers.prod-trd.lsports-gcp.cloud/ace-bps/mcp
+  TRADE_CUSTOMER_MCP_URL: https://stm-mcp-customers.prod-trd.lsports-gcp.cloud/trd_customers/mcp
+  ENVIRONMENT: prod
+  GCP_PROJECT_ID: lsports-prod-trd
+  GCP_REGION: europe-west1
