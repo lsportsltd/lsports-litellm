@@ -42,3 +42,4 @@ stages:
       safety: true
       deploy_k8s: true
       godo_branch: ${{parameters.godo_branch}}
+      deployDev: true
