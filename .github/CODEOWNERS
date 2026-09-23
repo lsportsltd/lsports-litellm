@@ -1,0 +1,12 @@
+# BEGIN PLATFORM-BEE MANAGED CODEOWNERS
+# Reconciled by GitHub SSA. Do not edit this block.
+* @lsportsltd/aieng @lsportsltd/aieng-leads
+# END PLATFORM-BEE MANAGED CODEOWNERS
+
+# BEGIN PLATFORM-BEE MANAGED WORKFLOWS
+.github/workflows/** @lsportsltd/aieng-leads @lsportsltd/devex-devops
+.github/workflows/ci.yaml @lsportsltd/aieng-leads
+.github/workflows/ci.yml @lsportsltd/aieng-leads
+.github/workflows/cd.yaml @lsportsltd/aieng-leads
+.github/workflows/cd.yml @lsportsltd/aieng-leads
+# END PLATFORM-BEE MANAGED WORKFLOWS
